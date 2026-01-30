@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ccbot:
+    build: .
+    container_name: ccbot
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./workspace:/app/workspace
+      - ./ccbot.db:/app/ccbot.db
+    environment:
+      - TZ=Asia/Shanghai
