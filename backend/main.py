@@ -19,6 +19,9 @@ from backend.claude.runner import runner_manager
 from backend.memory.manager import memory_manager
 from backend.db.models import db
 
+# Shutdown event
+shutdown_event = asyncio.Event()
+
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper()),
@@ -58,6 +61,10 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(bot_app.updater.start_polling(drop_pending_updates=True))
     logger.info("Telegram bot started")
 
+    # Start runner cleanup task
+    await runner_manager.start_cleanup_task()
+    logger.info("Runner cleanup task started")
+
     yield
 
     # Cleanup
@@ -68,6 +75,9 @@ async def lifespan(app: FastAPI):
         await bot_app.updater.stop()
         await bot_app.stop()
         await bot_app.shutdown()
+
+    # Stop cleanup task
+    await runner_manager.stop_cleanup_task()
 
     # Stop all runners
     await runner_manager.stop_all()

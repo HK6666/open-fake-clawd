@@ -102,7 +102,7 @@ class SessionManager:
         context = SessionContext(
             session_id=session_id,
             user_id=user_id,
-            working_directory=working_directory or settings.approved_directory,
+            working_directory=working_directory or settings.approved_directory_path,
             title=title
         )
 

@@ -24,7 +24,7 @@ class MemoryManager:
     """
 
     def __init__(self, workspace_path: Optional[Path] = None):
-        self.workspace = workspace_path or settings.workspace_path
+        self.workspace = workspace_path or settings.workspace_path_resolved
         self.memory_path = self.workspace / "memory"
         self.sessions_path = self.workspace / "sessions"
 
@@ -350,6 +350,101 @@ These tools are provided by Claude Code. Use them responsibly and always verify 
             })
 
         return sessions
+
+    async def extract_and_update_user_profile(self, session_messages: List[Dict[str, str]], working_directory: str):
+        """
+        Extract useful information from session and update USER.md.
+
+        Args:
+            session_messages: List of {"role": str, "content": str}
+            working_directory: The working directory used in this session
+        """
+        # Read current USER.md
+        user_content = await self.read_file("USER.md") or ""
+
+        updates = []
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        # Extract project directory if it's new
+        if working_directory and working_directory not in user_content:
+            updates.append(f"- `{working_directory}` (used on {timestamp})")
+
+        # Extract patterns from conversation
+        all_text = " ".join([m.get("content", "") for m in session_messages])
+
+        # Detect programming languages mentioned
+        languages = []
+        lang_patterns = {
+            "Python": ["python", ".py", "pip", "django", "flask", "fastapi"],
+            "JavaScript": ["javascript", "node", "npm", ".js", "react", "vue"],
+            "TypeScript": ["typescript", ".ts", ".tsx"],
+            "Go": ["golang", ".go", "go mod"],
+            "Rust": ["rust", "cargo", ".rs"],
+            "Java": ["java", "maven", "gradle", ".java"],
+        }
+
+        for lang, patterns in lang_patterns.items():
+            if any(p in all_text.lower() for p in patterns):
+                if lang not in user_content:
+                    languages.append(lang)
+
+        # Detect frameworks/tools
+        tools = []
+        tool_patterns = {
+            "Docker": ["docker", "dockerfile", "container"],
+            "Git": ["git", "commit", "branch", "merge"],
+            "PostgreSQL": ["postgres", "postgresql", "psql"],
+            "Redis": ["redis"],
+            "MongoDB": ["mongodb", "mongo"],
+        }
+
+        for tool, patterns in tool_patterns.items():
+            if any(p in all_text.lower() for p in patterns):
+                if tool not in user_content:
+                    tools.append(tool)
+
+        # Update USER.md if we found new information
+        if updates or languages or tools:
+            new_sections = []
+
+            if updates:
+                new_sections.append(f"\n### Recent Projects ({timestamp})\n" + "\n".join(updates))
+
+            if languages:
+                new_sections.append(f"\n### Detected Languages\n- " + "\n- ".join(languages))
+
+            if tools:
+                new_sections.append(f"\n### Detected Tools\n- " + "\n- ".join(tools))
+
+            # Append to Notes section or end of file
+            if "## Notes" in user_content:
+                # Insert before Notes section
+                parts = user_content.split("## Notes")
+                new_content = parts[0].rstrip() + "\n" + "\n".join(new_sections) + "\n\n## Notes" + parts[1]
+            else:
+                # Append to end
+                new_content = user_content.rstrip() + "\n" + "\n".join(new_sections) + "\n"
+
+            # Update last updated timestamp
+            if "*Last updated:" in new_content:
+                new_content = re.sub(
+                    r"\*Last updated:.*\*",
+                    f"*Last updated: {timestamp}*",
+                    new_content
+                )
+            else:
+                new_content += f"\n---\n\n*Last updated: {timestamp}*\n"
+
+            await self.write_file("USER.md", new_content)
+
+            return {
+                "updated": True,
+                "new_projects": len(updates),
+                "new_languages": languages,
+                "new_tools": tools
+            }
+
+        return {"updated": False}
 
 
 # Global memory manager

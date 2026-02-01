@@ -1,7 +1,7 @@
 # User Profile
 
 This file stores information about the user that helps personalize interactions.
-It will be updated automatically as we interact.
+It will be updated automatically when sessions end.
 
 ## Preferences
 
@@ -11,16 +11,25 @@ It will be updated automatically as we interact.
 
 ## Project Directories
 
-- Default working directory: Not configured
+*Project paths will be recorded automatically*
 
-## Common Tasks
+## Languages & Tools
 
-*Will be populated based on usage patterns*
+*Will be detected from conversations*
+
+### Recent Projects (2026-01-31 08:06)
+- `C:\Users\11421` (used on 2026-01-31 08:06)
+
+### Detected Languages
+- JavaScript
+
+### Detected Tools
+- Git
 
 ## Notes
 
-*Additional notes about user preferences will be added here*
+*Additional notes about user preferences*
 
 ---
 
-*Last updated: Not yet updated*
+*Last updated: 2026-01-31 08:06*

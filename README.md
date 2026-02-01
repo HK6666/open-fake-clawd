@@ -131,20 +131,42 @@ docker run -d \
 
 ## Telegram Bot 命令
 
+### 会话管理
 | 命令 | 功能 |
 |------|------|
 | `/start` | 显示帮助信息 |
 | `/new` | 开始新会话 |
 | `/continue` | 继续上次会话 |
 | `/sessions` | 列出历史会话 |
-| `/cd <path>` | 切换工作目录 |
-| `/ls` | 列出当前目录 |
-| `/pwd` | 显示当前目录 |
-| `/status` | 查看当前状态 |
-| `/stop` | 停止当前任务 |
+| `/clear` | 🆕 清空会话历史（保持会话活跃） |
+| `/end` | 结束当前会话 |
 | `/export` | 导出会话记录 |
 
+### 文件导航
+| 命令 | 功能 |
+|------|------|
+| `/cd <path>` | 切换工作目录 |
+| `/ls` | 列出当前目录 |
+| `/tree [depth]` | 🆕 显示目录树结构 |
+| `/pwd` | 显示当前目录 |
+
+### 状态和控制
+| 命令 | 功能 |
+|------|------|
+| `/status` | 查看当前状态 |
+| `/stats` | 🆕 显示使用统计 |
+| `/stop` | 停止当前任务 |
+
+### 快捷功能
+| 命令 | 功能 |
+|------|------|
+| `/menu` | 显示快捷菜单 |
+| `/actions` | 快速编码操作 |
+| `/help` | 帮助信息 |
+
 直接发送消息即可与 Claude Code 交互。
+
+> 🎉 **新增功能**: 智能消息分片、进度提示、错误恢复、活动追踪等！详见 `OPTIMIZATION_SUMMARY.md`
 
 ## Web Dashboard
 
@@ -171,6 +193,7 @@ workspace/
 
 ## 配置说明
 
+### 核心配置
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot Token | 必填 |
@@ -179,10 +202,22 @@ workspace/
 | `CLAUDE_CLI_PATH` | Claude CLI 路径 | claude |
 | `CLAUDE_TIMEOUT` | 执行超时 (秒) | 300 |
 | `CLAUDE_MAX_TURNS` | 最大对话轮数 | 50 |
+
+### 服务配置
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
 | `API_HOST` | API 监听地址 | 0.0.0.0 |
 | `API_PORT` | API 端口 | 8000 |
 | `RATE_LIMIT_REQUESTS` | 速率限制请求数 | 10 |
 | `RATE_LIMIT_WINDOW` | 速率限制窗口 (秒) | 60 |
+
+### 性能优化 🆕
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `MAX_CONCURRENT_SESSIONS` | 每用户最大并发会话 | 5 |
+| `SESSION_TIMEOUT_MINUTES` | 会话超时时间 (分钟) | 120 |
+| `MAX_MESSAGE_HISTORY` | 最大消息历史数 | 100 |
+| `AUTO_SAVE_SESSIONS` | 自动保存会话 | true |
 
 ## API 文档
 

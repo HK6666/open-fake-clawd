@@ -154,7 +154,7 @@ async def list_memory_files():
 
     # Core files
     for filename in ["SOUL.md", "USER.md", "AGENTS.md", "TOOLS.md"]:
-        filepath = settings.workspace_path / filename
+        filepath = settings.workspace_path_resolved / filename
         if filepath.exists():
             files.append({
                 "filename": filename,
@@ -164,7 +164,7 @@ async def list_memory_files():
             })
 
     # Memory fragments
-    for filepath in settings.workspace_path.joinpath("memory").glob("*.md"):
+    for filepath in settings.workspace_path_resolved.joinpath("memory").glob("*.md"):
         files.append({
             "filename": filepath.name,
             "path": str(filepath),
@@ -183,10 +183,10 @@ async def get_memory_file(filename: str):
         raise HTTPException(status_code=400, detail="Only .md files allowed")
 
     # Check in workspace root first
-    filepath = settings.workspace_path / filename
+    filepath = settings.workspace_path_resolved / filename
     if not filepath.exists():
         # Check in memory subdirectory
-        filepath = settings.workspace_path / "memory" / filename
+        filepath = settings.workspace_path_resolved / "memory" / filename
 
     if not filepath.exists():
         raise HTTPException(status_code=404, detail="File not found")
@@ -209,9 +209,9 @@ async def update_memory_file(filename: str, request: MemoryUpdateRequest):
 
     # Determine file path
     if filename in ["SOUL.md", "USER.md", "AGENTS.md", "TOOLS.md"]:
-        filepath = settings.workspace_path / filename
+        filepath = settings.workspace_path_resolved / filename
     else:
-        filepath = settings.workspace_path / "memory" / filename
+        filepath = settings.workspace_path_resolved / "memory" / filename
 
     # Ensure directory exists
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -251,13 +251,13 @@ async def stop_runner(user_id: int):
 async def get_config():
     """Get current configuration (safe subset)."""
     return {
-        "approved_directory": str(settings.approved_directory),
-        "workspace_path": str(settings.workspace_path),
+        "approved_directory": str(settings.approved_directory_path),
+        "workspace_path": str(settings.workspace_path_resolved),
         "claude_timeout": settings.claude_timeout,
         "claude_max_turns": settings.claude_max_turns,
         "rate_limit_requests": settings.rate_limit_requests,
         "rate_limit_window": settings.rate_limit_window,
-        "allowed_users_count": len(settings.allowed_users)
+        "allowed_users_count": len(settings.allowed_users_list)
     }
 
 
