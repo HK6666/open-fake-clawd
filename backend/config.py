@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     workspace_path: str = "./workspace"
 
     # Database
-    database_url: str = "sqlite+aiosqlite:///./ccbot.db"
+    database_url: str = "sqlite+aiosqlite:///./workspace/ccbot.db"
 
     # Logging
     log_level: str = "INFO"
