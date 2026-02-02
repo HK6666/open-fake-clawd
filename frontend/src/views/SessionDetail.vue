@@ -35,7 +35,7 @@ function goBack() {
     <div class="page-header">
       <button class="secondary" @click="goBack">← Back</button>
       <h1>Session Detail</h1>
-      <button class="primary" @click="exportSession">📥 Export</button>
+      <button class="primary" @click="exportSession">Export</button>
     </div>
 
     <div v-if="sessionStore.loading" class="loading">
@@ -93,7 +93,7 @@ function goBack() {
             :class="message.role"
           >
             <div class="message-header">
-              <span class="role">{{ message.role === 'user' ? '👤 User' : '🤖 Assistant' }}</span>
+              <span class="role">{{ message.role === 'user' ? 'User' : 'Assistant' }}</span>
               <span class="time">{{ formatDate(message.timestamp) }}</span>
             </div>
             <div class="message-content">
@@ -161,7 +161,7 @@ function goBack() {
 .messages-card h2 {
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
   font-size: 1.125rem;
 }
 
@@ -175,16 +175,17 @@ function goBack() {
 
 .message {
   padding: 1rem;
-  border-radius: 0.5rem;
-  background: var(--bg-dark);
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
 }
 
 .message.user {
-  border-left: 3px solid var(--primary);
+  border-left: 3px solid var(--text-primary);
 }
 
 .message.assistant {
-  border-left: 3px solid var(--success);
+  border-left: 3px solid var(--status-success);
 }
 
 .message-header {
@@ -196,7 +197,7 @@ function goBack() {
 }
 
 .role {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .time {
@@ -213,18 +214,21 @@ function goBack() {
 }
 
 .badge.idle {
-  background: rgba(34, 197, 94, 0.2);
-  color: var(--success);
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
 }
 
 .badge.processing {
-  background: rgba(234, 179, 8, 0.2);
-  color: var(--warning);
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning);
 }
 
 .badge.error {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--error);
+  background: var(--status-error-bg);
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
 }
 
 .loading, .error, .empty {
@@ -234,7 +238,7 @@ function goBack() {
 }
 
 .error {
-  color: var(--error);
+  color: var(--status-error);
 }
 
 @media (max-width: 768px) {

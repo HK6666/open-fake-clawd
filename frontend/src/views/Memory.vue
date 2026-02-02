@@ -64,7 +64,6 @@ function formatDate(date: string): string {
             @click="selectFile(file.filename)"
           >
             <div class="file-name">
-              <span class="icon">{{ file.type === 'core' ? '📄' : '🧠' }}</span>
               {{ file.filename }}
             </div>
             <div class="file-meta">
@@ -137,7 +136,7 @@ function formatDate(date: string): string {
   font-size: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .files {
@@ -147,36 +146,33 @@ function formatDate(date: string): string {
 
 .file-item {
   padding: 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: 3px;
   cursor: pointer;
   margin-bottom: 0.25rem;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .file-item:hover {
-  background: var(--bg-dark);
+  background: var(--hover-bg);
 }
 
 .file-item.active {
-  background: var(--primary);
+  background: var(--active-bg);
 }
 
 .file-name {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .file-meta {
   font-size: 0.75rem;
   color: var(--text-secondary);
   margin-top: 0.25rem;
-  margin-left: 1.5rem;
 }
 
 .file-item.active .file-meta {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 }
 
 .editor-panel {
@@ -197,7 +193,7 @@ function formatDate(date: string): string {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .editor-header h2 {
@@ -211,7 +207,7 @@ function formatDate(date: string): string {
 }
 
 .unsaved {
-  color: var(--warning);
+  color: var(--status-warning);
   font-size: 0.875rem;
 }
 
@@ -222,7 +218,7 @@ function formatDate(date: string): string {
   font-size: 0.875rem;
   line-height: 1.6;
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: 3px;
 }
 
 .empty-editor {

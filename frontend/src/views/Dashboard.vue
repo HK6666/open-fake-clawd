@@ -44,39 +44,32 @@ function formatDate(date: string): string {
 
     <div class="stats-grid">
       <div class="card stat-card">
-        <div class="stat-icon">💬</div>
         <div class="stat-info">
-          <div class="stat-value">{{ sessionStore.sessions.length }}</div>
           <div class="stat-label">Sessions</div>
+          <div class="stat-value">{{ sessionStore.sessions.length }}</div>
         </div>
       </div>
 
       <div class="card stat-card">
-        <div class="stat-icon">🤖</div>
         <div class="stat-info">
-          <div class="stat-value">{{ runners.length }}</div>
           <div class="stat-label">Active Runners</div>
+          <div class="stat-value">{{ runners.length }}</div>
         </div>
       </div>
 
       <div class="card stat-card">
-        <div class="stat-icon">💰</div>
         <div class="stat-info">
+          <div class="stat-label">Total Cost</div>
           <div class="stat-value">
             {{ formatCost(sessionStore.sessions.reduce((sum, s) => sum + s.total_cost, 0)) }}
           </div>
-          <div class="stat-label">Total Cost</div>
         </div>
       </div>
 
       <div class="card stat-card">
-        <div class="stat-icon">
-          <span v-if="health?.status === 'healthy'">✅</span>
-          <span v-else>❌</span>
-        </div>
         <div class="stat-info">
-          <div class="stat-value">{{ health?.status || 'Unknown' }}</div>
           <div class="stat-label">System Status</div>
+          <div class="stat-value">{{ health?.status || 'Unknown' }}</div>
         </div>
       </div>
     </div>
@@ -96,7 +89,7 @@ function formatDate(date: string): string {
               </div>
               <div class="session-meta">
                 <span class="badge" :class="session.state">{{ session.state }}</span>
-                <span>{{ session.message_count }} messages</span>
+                <span>{{ session.message_count }} msgs</span>
                 <span>{{ formatCost(session.total_cost) }}</span>
               </div>
             </div>
@@ -158,22 +151,27 @@ function formatDate(date: string): string {
 
 .stat-card {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  border: 1px solid var(--border-secondary);
 }
 
-.stat-icon {
-  font-size: 2rem;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .stat-label {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--text-primary);
 }
 
 .content-grid {
@@ -192,7 +190,7 @@ function formatDate(date: string): string {
   font-size: 1.125rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .session-list {
@@ -206,8 +204,14 @@ function formatDate(date: string): string {
   justify-content: space-between;
   align-items: flex-start;
   padding: 0.75rem;
-  background: var(--bg-dark);
-  border-radius: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+}
+
+.session-item:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-secondary);
 }
 
 .session-title {
@@ -228,18 +232,21 @@ function formatDate(date: string): string {
 }
 
 .badge.idle {
-  background: rgba(34, 197, 94, 0.2);
-  color: var(--success);
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
 }
 
 .badge.processing {
-  background: rgba(234, 179, 8, 0.2);
-  color: var(--warning);
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning);
 }
 
 .badge.error {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--error);
+  background: var(--status-error-bg);
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
 }
 
 .empty {
@@ -266,7 +273,7 @@ function formatDate(date: string): string {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .config-item:last-child {

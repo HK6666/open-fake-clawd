@@ -28,7 +28,7 @@ function viewSession(sessionId: string) {
     <div class="page-header">
       <h1>Sessions</h1>
       <button class="secondary" @click="sessionStore.fetchSessions()">
-        🔄 Refresh
+        Refresh
       </button>
     </div>
 
@@ -75,7 +75,7 @@ function viewSession(sessionId: string) {
 
         <div class="session-meta">
           <div class="directory">
-            📁 {{ session.working_directory }}
+            {{ session.working_directory }}
           </div>
           <div class="time">
             Updated: {{ formatDate(session.updated_at) }}
@@ -107,12 +107,12 @@ function viewSession(sessionId: string) {
 
 .session-card {
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
+  border-color: var(--border-secondary);
 }
 
 .session-header {
@@ -124,7 +124,7 @@ function viewSession(sessionId: string) {
 
 .session-title {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .session-details {
@@ -133,8 +133,9 @@ function viewSession(sessionId: string) {
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: var(--bg-dark);
-  border-radius: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
 }
 
 .detail {
@@ -167,18 +168,21 @@ function viewSession(sessionId: string) {
 }
 
 .badge.idle {
-  background: rgba(34, 197, 94, 0.2);
-  color: var(--success);
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
 }
 
 .badge.processing {
-  background: rgba(234, 179, 8, 0.2);
-  color: var(--warning);
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning);
 }
 
 .badge.error {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--error);
+  background: var(--status-error-bg);
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
 }
 
 .loading, .error, .empty {
@@ -188,7 +192,7 @@ function viewSession(sessionId: string) {
 }
 
 .error {
-  color: var(--error);
+  color: var(--status-error);
 }
 
 @media (max-width: 768px) {

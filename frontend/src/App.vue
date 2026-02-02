@@ -12,26 +12,21 @@ import { RouterLink, RouterView } from 'vue-router'
 
       <div class="nav-links">
         <RouterLink to="/" class="nav-item">
-          <span class="icon">📊</span>
           Dashboard
         </RouterLink>
         <RouterLink to="/sessions" class="nav-item">
-          <span class="icon">💬</span>
           Sessions
         </RouterLink>
         <RouterLink to="/memory" class="nav-item">
-          <span class="icon">🧠</span>
           Memory
         </RouterLink>
         <RouterLink to="/settings" class="nav-item">
-          <span class="icon">⚙️</span>
           Settings
         </RouterLink>
       </div>
 
       <div class="sidebar-footer">
         <a href="/docs" target="_blank" class="nav-item">
-          <span class="icon">📖</span>
           API Docs
         </a>
       </div>
@@ -52,7 +47,7 @@ import { RouterLink, RouterView } from 'vue-router'
 .sidebar {
   width: 240px;
   background: var(--bg-card);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border-primary);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -66,8 +61,8 @@ import { RouterLink, RouterView } from 'vue-router'
 
 .logo h1 {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .logo .version {
@@ -85,30 +80,26 @@ import { RouterLink, RouterView } from 'vue-router'
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 3px;
   color: var(--text-secondary);
-  transition: all 0.2s;
+  transition: all 0.15s;
+  font-size: 0.9rem;
 }
 
 .nav-item:hover {
-  background: var(--bg-dark);
+  background: var(--hover-bg);
   color: var(--text-primary);
   text-decoration: none;
 }
 
 .nav-item.router-link-active {
-  background: var(--primary);
-  color: white;
-}
-
-.nav-item .icon {
-  font-size: 1.25rem;
+  background: var(--active-bg);
+  color: var(--text-primary);
 }
 
 .sidebar-footer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-primary);
   padding-top: 1rem;
 }
 

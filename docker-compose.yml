@@ -2,14 +2,28 @@ version: '3.8'
 
 services:
   ccbot:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ccbot:latest
     container_name: ccbot
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "14532:14532"  # API port
     volumes:
       - ./.env:/app/.env:ro
       - ./workspace:/app/workspace
       - ./ccbot.db:/app/ccbot.db
     environment:
       - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:14532/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

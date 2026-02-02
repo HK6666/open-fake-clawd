@@ -142,7 +142,7 @@ RATE_LIMIT_WINDOW=60
   font-size: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .settings-group {
@@ -156,7 +156,7 @@ RATE_LIMIT_WINDOW=60
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .setting-item:last-child {
@@ -186,8 +186,8 @@ RATE_LIMIT_WINDOW=60
 }
 
 .info-card {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: var(--primary);
+  background: var(--bg-secondary);
+  border-color: var(--border-secondary);
 }
 
 .guide-content {
@@ -201,8 +201,9 @@ RATE_LIMIT_WINDOW=60
 .guide-content pre {
   margin: 1rem 0;
   padding: 1rem;
-  background: var(--bg-dark);
-  border-radius: 0.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 2px;
   overflow-x: auto;
 }
 

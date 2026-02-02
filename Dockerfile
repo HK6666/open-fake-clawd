@@ -1,38 +1,48 @@
-# ccBot Dockerfile
+# ccBot Dockerfile - Multi-stage build
+# Stage 1: Build frontend
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --silent
+COPY frontend/ ./
+RUN npm run build
+
+# Stage 2: Build final image
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# 安装 Node.js
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
+    git \
     curl \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制依赖文件
-COPY pyproject.toml .
-COPY frontend/package.json frontend/
+# Copy Python dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 安装 Python 依赖
-RUN pip install --no-cache-dir -e .
+# Copy backend code
+COPY backend/ ./backend/
 
-# 安装前端依赖并构建
-WORKDIR /app/frontend
-RUN npm install --silent
-COPY frontend/ .
-RUN npm run build
+# Copy built frontend from stage 1
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# 复制后端代码
-WORKDIR /app
-COPY backend/ backend/
-COPY workspace/ workspace/
-
-# 创建必要目录
+# Create necessary directories
 RUN mkdir -p workspace/memory workspace/sessions
 
-# 暴露端口
-EXPOSE 8000
+# Expose port (should match API_PORT in .env)
+EXPOSE 14532
 
-# 启动命令
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:14532/api/health || exit 1
+
+# Run as non-root user for security
+RUN useradd -m -u 1000 ccbot && \
+    chown -R ccbot:ccbot /app
+USER ccbot
+
+# Start command
 CMD ["python", "-m", "backend.main"]

@@ -1,0 +1,39 @@
+# GitHub Actions 自动部署配置
+# 当推送到 main 分支时自动部署到服务器
+
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+    
+    - name: 🚀 Deploy to server via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          git pull origin main
+          ./deploy.sh
+    
+    - name: ✅ Deployment complete
+      run: echo "Deployment completed successfully!"
+
+# 需要在 GitHub Repository Settings -> Secrets 中配置：
+# - SERVER_HOST: 服务器IP或域名
+# - SERVER_USER: SSH登录用户名
+# - SSH_PRIVATE_KEY: SSH私钥
+# - DEPLOY_PATH: 项目部署路径（如 /home/user/ccbot）
+# - SSH_PORT: SSH端口（可选，默认22）
