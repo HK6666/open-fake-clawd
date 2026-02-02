@@ -207,12 +207,14 @@ class OpenRouterProvider(LLMProvider):
 
 
 class GLMProvider(LLMProvider):
-    """GLM (智谱AI) API provider with JWT authentication."""
+    """GLM (智谱AI) API provider."""
 
     def __init__(self):
         self.api_key = settings.glm_api_key
         self.model = settings.glm_model
         self.base_url = "https://open.bigmodel.cn/api/paas/v4"
+        # Try JWT auth if API key has format {id}.{secret}, otherwise use direct auth
+        self.use_jwt = "." in self.api_key
 
     def get_name(self) -> str:
         return f"GLM ({self.model})"
@@ -252,8 +254,15 @@ class GLMProvider(LLMProvider):
         stream: bool = False
     ) -> AsyncIterator[str]:
         """Chat with streaming response."""
-        # Generate JWT token
-        token = self._generate_token()
+        # Choose authentication method
+        if self.use_jwt:
+            # Generate JWT token from {id}.{secret} format API key
+            token = self._generate_token()
+            logger.debug("Using JWT authentication for GLM API")
+        else:
+            # Use API key directly
+            token = self.api_key
+            logger.debug("Using direct API key authentication for GLM API")
 
         headers = {
             "Authorization": f"Bearer {token}",
@@ -271,6 +280,8 @@ class GLMProvider(LLMProvider):
             "stream": True
         }
 
+        logger.debug(f"GLM API Request: model={self.model}, messages_count={len(all_messages)}, use_jwt={self.use_jwt}")
+
         async with httpx.AsyncClient(timeout=settings.claude_timeout) as client:
             async with client.stream(
                 "POST",
@@ -278,6 +289,9 @@ class GLMProvider(LLMProvider):
                 headers=headers,
                 json=payload
             ) as response:
+                if response.status_code != 200:
+                    error_body = await response.aread()
+                    logger.error(f"GLM API Error: status={response.status_code}, body={error_body.decode()}")
                 response.raise_for_status()
                 async for line in response.aiter_lines():
                     if line.startswith("data: ") and line != "data: [DONE]":
