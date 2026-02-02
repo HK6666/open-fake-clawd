@@ -2,11 +2,13 @@
 
 import json
 import logging
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional, Dict, Any
 
 import httpx
+import jwt
 
 from backend.config import settings
 
@@ -205,7 +207,7 @@ class OpenRouterProvider(LLMProvider):
 
 
 class GLMProvider(LLMProvider):
-    """GLM (智谱AI) API provider."""
+    """GLM (智谱AI) API provider with JWT authentication."""
 
     def __init__(self):
         self.api_key = settings.glm_api_key
@@ -215,6 +217,34 @@ class GLMProvider(LLMProvider):
     def get_name(self) -> str:
         return f"GLM ({self.model})"
 
+    def _generate_token(self, exp_seconds: int = 3600) -> str:
+        """
+        Generate JWT token from API key.
+
+        GLM API key format: {id}.{secret}
+        Token expires after exp_seconds (default: 1 hour)
+        """
+        try:
+            api_key_id, secret = self.api_key.split(".")
+        except ValueError:
+            raise ValueError(
+                "Invalid GLM API key format. Expected format: {id}.{secret}\n"
+                "Get your API key from: https://bigmodel.cn/usercenter/proj-mgmt/apikeys"
+            )
+
+        payload = {
+            "api_key": api_key_id,
+            "exp": int(round(time.time() * 1000)) + exp_seconds * 1000,
+            "timestamp": int(round(time.time() * 1000)),
+        }
+
+        return jwt.encode(
+            payload,
+            secret,
+            algorithm="HS256",
+            headers={"alg": "HS256", "sign_type": "SIGN"},
+        )
+
     async def chat(
         self,
         messages: list[dict],
@@ -222,8 +252,11 @@ class GLMProvider(LLMProvider):
         stream: bool = False
     ) -> AsyncIterator[str]:
         """Chat with streaming response."""
+        # Generate JWT token
+        token = self._generate_token()
+
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
 
