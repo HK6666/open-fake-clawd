@@ -2,7 +2,8 @@
 
 import asyncio
 import json
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -14,6 +15,7 @@ from backend.config import settings
 from backend.claude.session import session_manager, SessionState
 from backend.claude.runner import runner_manager
 from backend.memory.manager import memory_manager
+from backend.db.models import db
 
 
 router = APIRouter(prefix="/api", tags=["api"])
@@ -325,3 +327,73 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "0.1.0"
     }
+
+
+# ============ Daily Request Statistics ============
+
+@router.get("/stats/daily-requests")
+async def get_daily_request_stats(days: int = 365, user_id: Optional[int] = None):
+    """Get daily request counts for the heatmap visualization.
+    
+    Args:
+        days: Number of days to look back (default 365 for full year)
+        user_id: Optional user ID to filter by (if not provided, returns total across all users)
+    
+    Returns:
+        List of daily request counts with dates
+    """
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days)
+    
+    start_date_str = start_date.strftime("%Y-%m-%d")
+    end_date_str = end_date.strftime("%Y-%m-%d")
+    
+    try:
+        # Get all dates in range with counts (including zeros)
+        cursor = await db._conn.execute(
+            """
+            WITH RECURSIVE dates(date) AS (
+                SELECT ?
+                UNION ALL
+                SELECT date(date, '+1 day')
+                FROM dates
+                WHERE date < ?
+            )
+            SELECT 
+                d.date,
+                COALESCE(SUM(drc.request_count), 0) as count
+            FROM dates d
+            LEFT JOIN daily_request_counts drc ON d.date = drc.date
+                AND (? IS NULL OR drc.user_id = ?)
+            GROUP BY d.date
+            ORDER BY d.date ASC
+            """,
+            (start_date_str, end_date_str, user_id, user_id)
+        )
+        rows = await cursor.fetchall()
+        
+        # Format data for heatmap
+        data = []
+        for row in rows:
+            data.append({
+                "date": row[0],
+                "count": row[1]
+            })
+        
+        # Calculate statistics
+        total_requests = sum(item["count"] for item in data)
+        active_days = sum(1 for item in data if item["count"] > 0)
+        max_count = max((item["count"] for item in data), default=0)
+        
+        return {
+            "data": data,
+            "total_requests": total_requests,
+            "active_days": active_days,
+            "max_count": max_count,
+            "start_date": start_date_str,
+            "end_date": end_date_str
+        }
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error fetching daily request stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch statistics: {str(e)}")

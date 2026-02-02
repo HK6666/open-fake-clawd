@@ -27,6 +27,12 @@
   --hover-bg: #e5e5e5;
   --active-bg: #d4d4d4;
   --focus-border: #999999;
+
+  /* Contribution heatmap colors (light theme - green palette) */
+  --contrib-level-1: #9be9a8;
+  --contrib-level-2: #40c463;
+  --contrib-level-3: #30a14e;
+  --contrib-level-4: #216e39;
 }
 
 * {
@@ -167,4 +173,47 @@ pre {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
+}
+
+/* Dark theme */
+html.dark {
+  /* Background system - Dark theme */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --bg-card: #161b22;
+
+  /* Text system - Dark theme */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #6e7681;
+  --text-placeholder: #484f58;
+
+  /* Borders - Dark theme */
+  --border-primary: #30363d;
+  --border-secondary: #21262d;
+
+  /* Status colors - Dark theme */
+  --status-success: #3fb950;
+  --status-success-bg: rgba(46, 160, 67, 0.15);
+  --status-warning: #d29922;
+  --status-warning-bg: rgba(187, 128, 9, 0.15);
+  --status-error: #f85149;
+  --status-error-bg: rgba(248, 81, 73, 0.15);
+
+  /* Interaction states - Dark theme */
+  --hover-bg: #21262d;
+  --active-bg: #30363d;
+  --focus-border: #58a6ff;
+
+  /* Contribution heatmap colors (dark theme - green palette) */
+  --contrib-level-1: #0e4429;
+  --contrib-level-2: #006d32;
+  --contrib-level-3: #26a641;
+  --contrib-level-4: #39d353;
+}
+
+/* Smooth theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }

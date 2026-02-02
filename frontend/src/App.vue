@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { useThemeStore } from './stores/theme'
+import { Moon, Sun, Monitor } from 'lucide-vue-next'
+
+const themeStore = useThemeStore()
+
+const themeIcons = {
+  light: Sun,
+  dark: Moon,
+  auto: Monitor
+}
+
+const themeLabels = {
+  light: 'Light',
+  dark: 'Dark',
+  auto: 'Auto'
+}
 </script>
 
 <template>
@@ -33,9 +49,23 @@ import { RouterLink, RouterView } from 'vue-router'
     </nav>
 
     <main class="main-content">
+      <header class="top-bar">
+        <div class="top-bar-spacer"></div>
+        <button 
+          class="theme-toggle" 
+          @click="themeStore.toggleTheme"
+          :title="`Theme: ${themeLabels[themeStore.theme]}`"
+        >
+          <component :is="themeIcons[themeStore.theme]" :size="18" />
+          <span class="theme-label">{{ themeLabels[themeStore.theme] }}</span>
+        </button>
+      </header>
       <RouterView />
     </main>
   </div>
+  
+  <!-- Global tooltip for heatmap -->
+  <div id="heatmap-tooltip"></div>
 </template>
 
 <style scoped>
@@ -108,5 +138,52 @@ import { RouterLink, RouterView } from 'vue-router'
   margin-left: 240px;
   padding: 2rem;
   min-height: 100vh;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.top-bar-spacer {
+  flex: 1;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-secondary);
+  color: var(--text-primary);
+}
+
+.theme-label {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .theme-label {
+    display: none;
+  }
+  
+  .theme-toggle {
+    padding: 0.5rem;
+  }
 }
 </style>

@@ -34,6 +34,18 @@ class Message:
     timestamp: datetime
 
 
+@dataclass
+class DailyRequestCount:
+    """Represents daily request count statistics."""
+
+    id: int
+    date: str  # YYYY-MM-DD format
+    user_id: int
+    request_count: int
+    created_at: datetime
+    updated_at: datetime
+
+
 class Database:
     """Database manager for session persistence."""
 
@@ -76,8 +88,20 @@ class Database:
                 FOREIGN KEY (session_id) REFERENCES sessions(id)
             );
 
+            CREATE TABLE IF NOT EXISTS daily_request_counts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                request_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(date, user_id)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
             CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);
+            CREATE INDEX IF NOT EXISTS idx_daily_counts_date ON daily_request_counts(date);
+            CREATE INDEX IF NOT EXISTS idx_daily_counts_user_id ON daily_request_counts(user_id);
         """)
         await self._conn.commit()
 
@@ -200,6 +224,71 @@ class Database:
         )
         rows = await cursor.fetchall()
         return [Message(**dict(row)) for row in rows]
+
+    async def increment_daily_request_count(self, user_id: int) -> DailyRequestCount:
+        """Increment daily request count for a user."""
+        today = datetime.now().strftime("%Y-%m-%d")
+        now = datetime.now()
+        
+        # Try to update existing record
+        cursor = await self._conn.execute(
+            """
+            UPDATE daily_request_counts 
+            SET request_count = request_count + 1, updated_at = ?
+            WHERE date = ? AND user_id = ?
+            """,
+            (now, today, user_id)
+        )
+        await self._conn.commit()
+        
+        # If no rows updated, insert new record
+        if cursor.rowcount == 0:
+            await self._conn.execute(
+                """
+                INSERT INTO daily_request_counts (date, user_id, request_count, created_at, updated_at)
+                VALUES (?, ?, 1, ?, ?)
+                """,
+                (today, user_id, now, now)
+            )
+            await self._conn.commit()
+        
+        # Return the record
+        cursor = await self._conn.execute(
+            """
+            SELECT * FROM daily_request_counts
+            WHERE date = ? AND user_id = ?
+            """,
+            (today, user_id)
+        )
+        row = await cursor.fetchone()
+        if row:
+            return DailyRequestCount(**dict(row))
+        return None
+
+    async def get_daily_request_counts(self, start_date: str, end_date: str, user_id: int = None) -> List[DailyRequestCount]:
+        """Get daily request counts for a date range."""
+        if user_id:
+            cursor = await self._conn.execute(
+                """
+                SELECT * FROM daily_request_counts
+                WHERE date >= ? AND date <= ? AND user_id = ?
+                ORDER BY date ASC
+                """,
+                (start_date, end_date, user_id)
+            )
+        else:
+            cursor = await self._conn.execute(
+                """
+                SELECT date, SUM(request_count) as request_count
+                FROM daily_request_counts
+                WHERE date >= ? AND date <= ?
+                GROUP BY date
+                ORDER BY date ASC
+                """,
+                (start_date, end_date)
+            )
+        rows = await cursor.fetchall()
+        return [DailyRequestCount(**dict(row)) for row in rows]
 
 
 # Global database instance

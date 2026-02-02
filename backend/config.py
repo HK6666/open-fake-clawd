@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openrouter_model: str = "anthropic/claude-sonnet-4"
 
+    # GLM (智谱AI) API
+    glm_api_key: str = ""
+    glm_model: str = "glm-4.7"
+
     # Server
     api_host: str = "0.0.0.0"
     api_port: int = 8000

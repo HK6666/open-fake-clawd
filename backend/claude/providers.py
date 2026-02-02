@@ -204,6 +204,59 @@ class OpenRouterProvider(LLMProvider):
                             pass
 
 
+class GLMProvider(LLMProvider):
+    """GLM (智谱AI) API provider."""
+
+    def __init__(self):
+        self.api_key = settings.glm_api_key
+        self.model = settings.glm_model
+        self.base_url = "https://open.bigmodel.cn/api/paas/v4"
+
+    def get_name(self) -> str:
+        return f"GLM ({self.model})"
+
+    async def chat(
+        self,
+        messages: list[dict],
+        system: str = None,
+        stream: bool = False
+    ) -> AsyncIterator[str]:
+        """Chat with streaming response."""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        all_messages = []
+        if system:
+            all_messages.append({"role": "system", "content": system})
+        all_messages.extend(messages)
+
+        payload = {
+            "model": self.model,
+            "messages": all_messages,
+            "stream": True
+        }
+
+        async with httpx.AsyncClient(timeout=settings.claude_timeout) as client:
+            async with client.stream(
+                "POST",
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=payload
+            ) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if line.startswith("data: ") and line != "data: [DONE]":
+                        try:
+                            data = json.loads(line[6:])
+                            delta = data.get("choices", [{}])[0].get("delta", {})
+                            if "content" in delta:
+                                yield delta["content"]
+                        except json.JSONDecodeError:
+                            pass
+
+
 def get_llm_provider() -> Optional[LLMProvider]:
     """
     Get the configured LLM provider.
@@ -229,6 +282,11 @@ def get_llm_provider() -> Optional[LLMProvider]:
         if not settings.openrouter_api_key:
             raise ValueError("OPENROUTER_API_KEY not configured")
         return OpenRouterProvider()
+
+    elif provider == "glm":
+        if not settings.glm_api_key:
+            raise ValueError("GLM_API_KEY not configured")
+        return GLMProvider()
 
     else:
         raise ValueError(f"Unknown LLM provider: {provider}")

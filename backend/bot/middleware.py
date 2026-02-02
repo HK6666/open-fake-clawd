@@ -11,6 +11,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from backend.config import settings
+from backend.db.models import db
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +150,12 @@ def require_auth(func: Callable) -> Callable:
         command_name = func.__name__.replace("_command", "").replace("_", " ")
         activity_tracker.record_activity(user_id, command_name)
         logger.info(f"User {user_id} ({user.username or user.first_name}) executed: {command_name}")
+        
+        # Record daily request count
+        try:
+            await db.increment_daily_request_count(user_id)
+        except Exception as e:
+            logger.error(f"Failed to record daily request count: {e}")
 
         return await func(update, context, *args, **kwargs)
 
