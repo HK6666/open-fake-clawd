@@ -32,6 +32,19 @@ fi
 echo -e "${YELLOW}📦 Stopping old containers...${NC}"
 docker-compose down
 
+# 创建必要的目录
+echo -e "${YELLOW}📁 Creating workspace directories...${NC}"
+mkdir -p workspace/memory workspace/sessions
+
+# 设置权限（容器内用户 UID=1000）
+echo -e "${YELLOW}🔐 Setting workspace permissions...${NC}"
+if [ "$(id -u)" -eq 0 ]; then
+    chown -R 1000:1000 workspace
+    chmod -R 755 workspace
+else
+    sudo chown -R 1000:1000 workspace 2>/dev/null || chmod -R 777 workspace
+fi
+
 # 拉取最新代码（如果在 Git 仓库中）
 if [ -d .git ]; then
     echo -e "${YELLOW}🔄 Pulling latest code from Git...${NC}"
